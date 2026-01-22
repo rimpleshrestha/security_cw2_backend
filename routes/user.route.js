@@ -2,21 +2,23 @@ const express = require("express");
 const {
   loginController,
   signupController,
+  logoutController, // new
   updateUserNameController,
   changePasswordController,
   deleteUserController,
   updateProfileImage,
 } = require("../controller/user.controller.js");
 const { Authenticate } = require("../middleware/VerifyJWT.js");
-const { AuthorizeAdmin } = require("../middleware/AuthorizeAdmin.js"); // admin middleware
+const { AuthorizeAdmin } = require("../middleware/AuthorizeAdmin.js");
 const upload = require("../utils/upload.js");
-const { loginLimiter } = require("../utils/ratelimiter.js"); // login rate limiter
+const { loginLimiter } = require("../utils/ratelimiter.js");
 
 const router = express.Router();
 
 // --- AUTH ROUTES ---
 router.post("/signup", signupController);
-router.post("/login", loginLimiter, loginController); // apply login limiter
+router.post("/login", loginLimiter, loginController);
+router.post("/logout", Authenticate, logoutController); // logout route
 
 // --- USER ROUTES ---
 router.put("/change-password", Authenticate, changePasswordController);

@@ -99,6 +99,23 @@ const loginController = async (req, res) => {
   }
 };
 
+// --- LOGOUT (Task 8) ---
+const logoutController = async (req, res) => {
+  try {
+    await logActivity(req.user, "Logout");
+
+    // Clear cookies
+    res
+      .clearCookie("refreshToken")
+      .clearCookie("accessToken")
+      .status(200)
+      .json({ message: "Logout successful" });
+  } catch (error) {
+    console.log("error during logout", error);
+    res.status(500).json({ message: "Internal Server Error During Logout" });
+  }
+};
+
 // --- CHANGE PASSWORD ---
 const changePasswordController = async (req, res) => {
   try {
@@ -209,6 +226,7 @@ const updateProfileImage = async (req, res) => {
 module.exports = {
   signupController,
   loginController,
+  logoutController, // new
   changePasswordController,
   deleteUserController,
   updateUserNameController,
