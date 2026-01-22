@@ -7,15 +7,15 @@ const {
   cookiesOptions,
 } = require("../utils/jwt.js");
 
+// --- Password complexity regex ---
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+
+// SIGNUP
 const signupController = async (req, res) => {
   try {
-    console.log(req.body);
     const { email, password, confirm_password } = req.body;
-    console.log(email, password, confirm_password);
 
-    if (
-      [email, password, confirm_password].some((field) => field.trim() == "")
-    ) {
+    if ([email, password, confirm_password].some((f) => f.trim() === "")) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -23,57 +23,53 @@ const signupController = async (req, res) => {
       return res.status(400).json({ message: "Passwords don't match" });
     }
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "Email is Taken" });
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          "Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.",
+      });
     }
+
+    const userExists = await User.findOne({ email });
+    if (userExists) return res.status(400).json({ message: "Email is Taken" });
 
     const encryptedPassword = await encryptPassword(password);
-    const user = await User.create({
-      email,
-      password: encryptedPassword,
-    });
 
-    if (!user) {
-      return res
-        .status(400)
-        .json({ message: "Server Error During Creating a new user" });
-    }
+    const user = await User.create({ email, password: encryptedPassword });
+    if (!user)
+      return res.status(400).json({ message: "Server Error Creating User" });
 
     const accessToken = generateJWTToken({ id: user._id });
     const refreshToken = generateRefreshToken({ id: user._id });
 
-    res
+    return res
       .cookie("refreshToken", refreshToken, cookiesOptions)
       .cookie("accessToken", accessToken, cookiesOptions)
       .status(201)
-      .json({
-        message: "User Created Successfully",
-        accessToken: accessToken,
-      });
+      .json({ message: "User Created Successfully", accessToken });
   } catch (error) {
     console.log("error during signup", error);
-    res.status(500).json({ message: "Internal Server Error During Signup" });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error During Signup" });
   }
 };
 
+// LOGIN
 const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if ([email, password].some((field) => !field || field.trim() === "")) {
+    if ([email, password].some((f) => !f || f.trim() === "")) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid) {
+    if (!isPasswordValid)
       return res.status(400).json({ message: "Invalid credentials" });
-    }
 
     const accessToken = generateJWTToken({ id: user._id });
     const refreshToken = generateRefreshToken({ id: user._id });
@@ -84,7 +80,7 @@ const loginController = async (req, res) => {
       .status(200)
       .json({
         message: "Login Successful",
-        accessToken: accessToken,
+        accessToken,
         userRole: user.role,
         avatar: user.avatar,
         name: user.name,
@@ -92,19 +88,18 @@ const loginController = async (req, res) => {
       });
   } catch (error) {
     console.log("error during login", error);
-    res.status(500).json({ message: "Internal Server Error During Login" });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error During Login" });
   }
 };
 
+// CHANGE PASSWORD
 const changePasswordController = async (req, res) => {
   try {
     const { email, new_password, confirm_password } = req.body;
-    console.log(email, new_password, confirm_password);
-    if (
-      [email, new_password, confirm_password].some(
-        (field) => field.trim() == ""
-      )
-    ) {
+
+    if ([email, new_password, confirm_password].some((f) => f.trim() === "")) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -112,100 +107,99 @@ const changePasswordController = async (req, res) => {
       return res.status(400).json({ message: "New passwords don't match" });
     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
+    if (!passwordRegex.test(new_password)) {
+      return res.status(400).json({
+        message:
+          "New password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.",
+      });
     }
 
-    const encryptedNewPassword = await encryptPassword(new_password);
-    user.password = encryptedNewPassword;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    user.password = await encryptPassword(new_password);
     await user.save();
 
     return res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
     console.log("error during password change", error);
-    res
+    return res
       .status(500)
       .json({ message: "Internal Server Error During Password Change" });
   }
 };
 
+// DELETE USER
 const deleteUserController = async (req, res) => {
   try {
     const deletedUser = await User.findOneAndDelete({ _id: req.user });
-    if (!deletedUser) {
+    if (!deletedUser)
       return res.status(404).json({ message: "User not found" });
-    }
 
     return res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     console.log("error during user deletion", error);
-    res
+    return res
       .status(500)
       .json({ message: "Internal Server Error During User Deletion" });
   }
 };
 
+// UPDATE NAME
 const updateUserNameController = async (req, res) => {
   try {
     const { name } = req.body;
-    if (!name || name.trim() === "") {
+    if (!name || name.trim() === "")
       return res.status(400).json({ message: "Name is required" });
-    }
 
     const user = await User.findOneAndUpdate(
       { _id: req.user },
       { name },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    return res.status(200).json({
-      message: "User name updated successfully",
-      user,
-    });
+    return res
+      .status(200)
+      .json({ message: "User name updated successfully", user });
   } catch (error) {
     console.log("error during updating user name", error);
-    res
+    return res
       .status(500)
       .json({ message: "Internal Server Error During User Name Update" });
   }
 };
+
+// UPDATE PROFILE IMAGE
 const updateProfileImage = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-    console.log("File received:", req.file);
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
     const imageUrl = await uploadImageToCloudinary(req.file.path);
-    if (!imageUrl) {
+    if (!imageUrl)
       return res.status(500).json({ message: "Failed to upload image" });
-    }
-    console.log("Image URL:", imageUrl);
+
     const user = await User.findByIdAndUpdate(
       req.user,
       { avatar: imageUrl.url },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    return res.status(200).json({
-      message: "Profile image updated successfully",
-      user,
-    });
+    return res
+      .status(200)
+      .json({ message: "Profile image updated successfully", user });
   } catch (error) {
     console.log("error during updating profile image", error);
-    res
+    return res
       .status(500)
       .json({ message: "Internal Server Error During Profile Image Update" });
   }
 };
+
+// --- EXPORT ALL CONTROLLERS ---
 module.exports = {
   signupController,
   loginController,
