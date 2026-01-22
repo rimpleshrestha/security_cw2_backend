@@ -9,7 +9,7 @@ const {
 } = require("../controller/user.controller.js");
 const { Authenticate } = require("../middleware/VerifyJWT.js");
 const upload = require("../utils/upload.js");
-const { loginLimiter } = require("../utils/rateLimiter.js"); // added rate limiter
+const { loginLimiter } = require("../utils/ratelimiter.js"); // added rate limiter
 
 const router = express.Router();
 
