@@ -6,29 +6,27 @@ const {
   generateRefreshToken,
   cookiesOptions,
 } = require("../utils/jwt.js");
+const logActivity = require("../utils/activityLogger.js");
 
-// --- Password complexity regex ---
+// Password regex
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
 
-// SIGNUP
+// --- SIGNUP ---
 const signupController = async (req, res) => {
   try {
     const { email, password, confirm_password } = req.body;
 
-    if ([email, password, confirm_password].some((f) => f.trim() === "")) {
+    if ([email, password, confirm_password].some((f) => f.trim() === ""))
       return res.status(400).json({ message: "All fields are required" });
-    }
 
-    if (password !== confirm_password) {
+    if (password !== confirm_password)
       return res.status(400).json({ message: "Passwords don't match" });
-    }
 
-    if (!passwordRegex.test(password)) {
+    if (!passwordRegex.test(password))
       return res.status(400).json({
         message:
           "Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.",
       });
-    }
 
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: "Email is Taken" });
@@ -41,6 +39,8 @@ const signupController = async (req, res) => {
 
     const accessToken = generateJWTToken({ id: user._id });
     const refreshToken = generateRefreshToken({ id: user._id });
+
+    await logActivity(user._id, "Signup success");
 
     return res
       .cookie("refreshToken", refreshToken, cookiesOptions)
@@ -55,24 +55,29 @@ const signupController = async (req, res) => {
   }
 };
 
-// LOGIN
+// --- LOGIN ---
 const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    if ([email, password].some((f) => !f || f.trim() === "")) {
+    if ([email, password].some((f) => !f || f.trim() === ""))
       return res.status(400).json({ message: "All fields are required" });
-    }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) {
+      await logActivity(null, `Login failed for email: ${email}`);
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid)
+    if (!isPasswordValid) {
+      await logActivity(user._id, "Login failed");
       return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const accessToken = generateJWTToken({ id: user._id });
     const refreshToken = generateRefreshToken({ id: user._id });
+
+    await logActivity(user._id, "Login success");
 
     return res
       .cookie("refreshToken", refreshToken, cookiesOptions)
@@ -94,31 +99,30 @@ const loginController = async (req, res) => {
   }
 };
 
-// CHANGE PASSWORD
+// --- CHANGE PASSWORD ---
 const changePasswordController = async (req, res) => {
   try {
     const { email, new_password, confirm_password } = req.body;
 
-    if ([email, new_password, confirm_password].some((f) => f.trim() === "")) {
+    if ([email, new_password, confirm_password].some((f) => f.trim() === ""))
       return res.status(400).json({ message: "All fields are required" });
-    }
 
-    if (new_password !== confirm_password) {
+    if (new_password !== confirm_password)
       return res.status(400).json({ message: "New passwords don't match" });
-    }
 
-    if (!passwordRegex.test(new_password)) {
+    if (!passwordRegex.test(new_password))
       return res.status(400).json({
         message:
           "New password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.",
       });
-    }
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
 
     user.password = await encryptPassword(new_password);
     await user.save();
+
+    await logActivity(user._id, "Password change");
 
     return res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
@@ -129,12 +133,14 @@ const changePasswordController = async (req, res) => {
   }
 };
 
-// DELETE USER
+// --- DELETE USER ---
 const deleteUserController = async (req, res) => {
   try {
     const deletedUser = await User.findOneAndDelete({ _id: req.user });
     if (!deletedUser)
       return res.status(404).json({ message: "User not found" });
+
+    await logActivity(req.user, "User deleted");
 
     return res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
@@ -145,7 +151,7 @@ const deleteUserController = async (req, res) => {
   }
 };
 
-// UPDATE NAME
+// --- UPDATE NAME ---
 const updateUserNameController = async (req, res) => {
   try {
     const { name } = req.body;
@@ -171,7 +177,7 @@ const updateUserNameController = async (req, res) => {
   }
 };
 
-// UPDATE PROFILE IMAGE
+// --- UPDATE PROFILE IMAGE ---
 const updateProfileImage = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
