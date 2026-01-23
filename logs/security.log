@@ -2,3 +2,11 @@
 {"timestamp":"2026-01-23T10:15:25.469Z","type":"OTP_SENT","message":"OTP sent for MFA login","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
 {"timestamp":"2026-01-23T10:15:26.889Z","type":"OTP_SENT","message":"OTP sent for MFA login","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
 {"timestamp":"2026-01-23T10:15:50.763Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:19:51.037Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:19:55.019Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:19:59.053Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:24:27.020Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:24:31.206Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:24:35.209Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:24:39.704Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:24:43.908Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
