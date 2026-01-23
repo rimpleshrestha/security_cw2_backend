@@ -2,11 +2,12 @@ const express = require("express");
 const {
   loginController,
   signupController,
-  logoutController, // new
+  logoutController,
   updateUserNameController,
   changePasswordController,
   deleteUserController,
   updateProfileImage,
+  verifyOtpController, // ✅ import OTP controller
 } = require("../controller/user.controller.js");
 const { Authenticate } = require("../middleware/VerifyJWT.js");
 const { AuthorizeAdmin } = require("../middleware/AuthorizeAdmin.js");
@@ -18,7 +19,8 @@ const router = express.Router();
 // --- AUTH ROUTES ---
 router.post("/signup", signupController);
 router.post("/login", loginLimiter, loginController);
-router.post("/logout", Authenticate, logoutController); // logout route
+router.post("/verify-otp", verifyOtpController); // ✅ OTP verification route
+router.post("/logout", Authenticate, logoutController);
 
 // --- USER ROUTES ---
 router.put("/change-password", Authenticate, changePasswordController);
@@ -31,7 +33,7 @@ router.put(
 );
 router.delete("/delete-user", Authenticate, deleteUserController);
 
-// --- ADMIN-ONLY ROUTE (Task 6) ---
+// --- ADMIN-ONLY ROUTE ---
 router.get("/admin-only", Authenticate, AuthorizeAdmin, (req, res) => {
   res.status(200).json({ message: "Welcome, Admin! You have access." });
 });

@@ -30,10 +30,22 @@ const UserSchema = new mongoose.Schema(
         ref: "Post",
       },
     ],
+
+    // 🔐 MFA / OTP fields
+    otpHash: {
+      type: String,
+    },
+    otpExpiresAt: {
+      type: Date,
+    },
+    isOtpVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const User = mongoose.model("User", UserSchema);

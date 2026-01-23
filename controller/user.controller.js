@@ -1,4 +1,5 @@
 const User = require("../model/user.model.js");
+const bcrypt = require("bcryptjs");
 const { comparePassword, encryptPassword } = require("../utils/bcrypt.js");
 const { uploadImageToCloudinary } = require("../utils/cloudinary.js");
 const {
@@ -7,11 +8,13 @@ const {
   cookiesOptions,
 } = require("../utils/jwt.js");
 const logActivity = require("../utils/activityLogger.js");
+const { generateOTP, hashOTP } = require("../utils/otp.js");
+const sendEmail = require("../utils/sendEmail.js");
 
 // Password regex
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
 
-// --- SIGNUP ---
+// -------------------- SIGNUP --------------------
 const signupController = async (req, res) => {
   try {
     const { email, password, confirm_password } = req.body;
@@ -33,14 +36,15 @@ const signupController = async (req, res) => {
 
     const encryptedPassword = await encryptPassword(password);
 
-    const user = await User.create({ email, password: encryptedPassword });
-    if (!user)
-      return res.status(400).json({ message: "Server Error Creating User" });
+    const user = await User.create({
+      email,
+      password: encryptedPassword,
+    });
+
+    await logActivity(user._id, "Signup success");
 
     const accessToken = generateJWTToken({ id: user._id });
     const refreshToken = generateRefreshToken({ id: user._id });
-
-    await logActivity(user._id, "Signup success");
 
     return res
       .cookie("refreshToken", refreshToken, cookiesOptions)
@@ -55,42 +59,43 @@ const signupController = async (req, res) => {
   }
 };
 
-// --- LOGIN ---
+// -------------------- LOGIN (MFA STEP 1) --------------------
 const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if ([email, password].some((f) => !f || f.trim() === ""))
       return res.status(400).json({ message: "All fields are required" });
 
     const user = await User.findOne({ email });
-    if (!user) {
-      await logActivity(null, `Login failed for email: ${email}`);
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid) {
-      await logActivity(user._id, "Login failed");
+    if (!isPasswordValid)
       return res.status(400).json({ message: "Invalid credentials" });
-    }
 
-    const accessToken = generateJWTToken({ id: user._id });
-    const refreshToken = generateRefreshToken({ id: user._id });
+    // 🔐 Generate OTP
+    const otp = generateOTP();
+    const otpHash = await hashOTP(otp);
 
-    await logActivity(user._id, "Login success");
+    user.otpHash = otpHash;
+    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    user.isOtpVerified = false;
+    await user.save();
 
-    return res
-      .cookie("refreshToken", refreshToken, cookiesOptions)
-      .cookie("accessToken", accessToken, cookiesOptions)
-      .status(200)
-      .json({
-        message: "Login Successful",
-        accessToken,
-        userRole: user.role,
-        avatar: user.avatar,
-        name: user.name,
-        email: user.email,
-      });
+    // 📧 Send OTP
+    await sendEmail({
+      to: user.email,
+      subject: "Your Login Verification Code",
+      text: `Your OTP is ${otp}. It will expire in 10 minutes.`,
+    });
+
+    await logActivity(user._id, "OTP sent for login");
+
+    return res.status(200).json({
+      message: "OTP sent to registered email. Verify to continue.",
+      mfaRequired: true,
+    });
   } catch (error) {
     console.log("error during login", error);
     return res
@@ -99,13 +104,63 @@ const loginController = async (req, res) => {
   }
 };
 
-// --- LOGOUT (Task 8) ---
+// -------------------- VERIFY OTP (MFA STEP 2) --------------------
+const verifyOtpController = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp)
+      return res.status(400).json({ message: "Email and OTP are required" });
+
+    const user = await User.findOne({ email });
+    if (!user || !user.otpHash)
+      return res.status(400).json({ message: "OTP verification failed" });
+
+    // ⏰ Check expiry
+    if (user.otpExpiresAt < new Date())
+      return res.status(400).json({ message: "OTP expired" });
+
+    // 🔐 Compare OTP
+    const isOtpValid = await bcrypt.compare(otp, user.otpHash);
+    if (!isOtpValid) return res.status(400).json({ message: "Invalid OTP" });
+
+    // ✅ OTP verified
+    user.isOtpVerified = true;
+    user.otpHash = undefined;
+    user.otpExpiresAt = undefined;
+    await user.save();
+
+    const accessToken = generateJWTToken({ id: user._id });
+    const refreshToken = generateRefreshToken({ id: user._id });
+
+    await logActivity(user._id, "OTP verified, login completed");
+
+    return res
+      .cookie("refreshToken", refreshToken, cookiesOptions)
+      .cookie("accessToken", accessToken, cookiesOptions)
+      .status(200)
+      .json({
+        message: "Login successful",
+        accessToken,
+        userRole: user.role,
+        avatar: user.avatar,
+        name: user.name,
+        email: user.email,
+      });
+  } catch (error) {
+    console.log("error during OTP verification", error);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error During OTP Verification" });
+  }
+};
+
+// -------------------- LOGOUT --------------------
 const logoutController = async (req, res) => {
   try {
     await logActivity(req.user, "Logout");
 
-    // Clear cookies
-    res
+    return res
       .clearCookie("refreshToken")
       .clearCookie("accessToken")
       .status(200)
@@ -116,7 +171,7 @@ const logoutController = async (req, res) => {
   }
 };
 
-// --- CHANGE PASSWORD ---
+// -------------------- CHANGE PASSWORD --------------------
 const changePasswordController = async (req, res) => {
   try {
     const { email, new_password, confirm_password } = req.body;
@@ -150,7 +205,7 @@ const changePasswordController = async (req, res) => {
   }
 };
 
-// --- DELETE USER ---
+// -------------------- DELETE USER --------------------
 const deleteUserController = async (req, res) => {
   try {
     const deletedUser = await User.findOneAndDelete({ _id: req.user });
@@ -168,10 +223,11 @@ const deleteUserController = async (req, res) => {
   }
 };
 
-// --- UPDATE NAME ---
+// -------------------- UPDATE NAME --------------------
 const updateUserNameController = async (req, res) => {
   try {
     const { name } = req.body;
+
     if (!name || name.trim() === "")
       return res.status(400).json({ message: "Name is required" });
 
@@ -194,7 +250,7 @@ const updateUserNameController = async (req, res) => {
   }
 };
 
-// --- UPDATE PROFILE IMAGE ---
+// -------------------- UPDATE PROFILE IMAGE --------------------
 const updateProfileImage = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
@@ -222,11 +278,12 @@ const updateProfileImage = async (req, res) => {
   }
 };
 
-// --- EXPORT ALL CONTROLLERS ---
+// -------------------- EXPORTS --------------------
 module.exports = {
   signupController,
   loginController,
-  logoutController, // new
+  verifyOtpController,
+  logoutController,
   changePasswordController,
   deleteUserController,
   updateUserNameController,
