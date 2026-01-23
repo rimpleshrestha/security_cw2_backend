@@ -1,0 +1,4 @@
+{"timestamp":"2026-01-23T10:15:01.535Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:15:25.469Z","type":"OTP_SENT","message":"OTP sent for MFA login","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:15:26.889Z","type":"OTP_SENT","message":"OTP sent for MFA login","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:15:50.763Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}

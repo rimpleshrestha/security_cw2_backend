@@ -8,6 +8,7 @@ const {
   cookiesOptions,
 } = require("../utils/jwt.js");
 const logActivity = require("../utils/activityLogger.js");
+const logSecurityEvent = require("../utils/securityLogger.js"); // ✅ ADDED
 const { generateOTP, hashOTP } = require("../utils/otp.js");
 const sendEmail = require("../utils/sendEmail.js");
 
@@ -19,8 +20,12 @@ const signupController = async (req, res) => {
   try {
     const { email, password, confirm_password } = req.body;
 
-    if ([email, password, confirm_password].some((f) => f.trim() === ""))
+    if ([email, password, confirm_password].some((f) => f.trim() === "")) {
+      logSecurityEvent("SIGNUP_FAILED", "Empty fields during signup", {
+        ip: req.ip,
+      });
       return res.status(400).json({ message: "All fields are required" });
+    }
 
     if (password !== confirm_password)
       return res.status(400).json({ message: "Passwords don't match" });
@@ -28,11 +33,17 @@ const signupController = async (req, res) => {
     if (!passwordRegex.test(password))
       return res.status(400).json({
         message:
-          "Password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.",
+          "Password must be at least 6 characters, include uppercase, lowercase and number",
       });
 
     const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: "Email is Taken" });
+    if (userExists) {
+      logSecurityEvent("SIGNUP_FAILED", "Email already exists", {
+        email,
+        ip: req.ip,
+      });
+      return res.status(400).json({ message: "Email is Taken" });
+    }
 
     const encryptedPassword = await encryptPassword(password);
 
@@ -42,6 +53,12 @@ const signupController = async (req, res) => {
     });
 
     await logActivity(user._id, "Signup success");
+
+    logSecurityEvent("SIGNUP_SUCCESS", "User registered successfully", {
+      userId: user._id,
+      email,
+      ip: req.ip,
+    });
 
     const accessToken = generateJWTToken({ id: user._id });
     const refreshToken = generateRefreshToken({ id: user._id });
@@ -64,26 +81,38 @@ const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if ([email, password].some((f) => !f || f.trim() === ""))
+    if ([email, password].some((f) => !f || f.trim() === "")) {
+      logSecurityEvent("LOGIN_FAILED", "Empty login fields", { ip: req.ip });
       return res.status(400).json({ message: "All fields are required" });
+    }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) {
+      logSecurityEvent("LOGIN_FAILED", "Invalid email", {
+        email,
+        ip: req.ip,
+      });
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid)
+    if (!isPasswordValid) {
+      logSecurityEvent("LOGIN_FAILED", "Incorrect password", {
+        userId: user._id,
+        ip: req.ip,
+      });
       return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     // 🔐 Generate OTP
     const otp = generateOTP();
     const otpHash = await hashOTP(otp);
 
     user.otpHash = otpHash;
-    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
     user.isOtpVerified = false;
     await user.save();
 
-    // 📧 Send OTP
     await sendEmail({
       to: user.email,
       subject: "Your Login Verification Code",
@@ -91,6 +120,11 @@ const loginController = async (req, res) => {
     });
 
     await logActivity(user._id, "OTP sent for login");
+
+    logSecurityEvent("OTP_SENT", "OTP sent for MFA login", {
+      userId: user._id,
+      ip: req.ip,
+    });
 
     return res.status(200).json({
       message: "OTP sent to registered email. Verify to continue.",
@@ -113,18 +147,26 @@ const verifyOtpController = async (req, res) => {
       return res.status(400).json({ message: "Email and OTP are required" });
 
     const user = await User.findOne({ email });
-    if (!user || !user.otpHash)
+    if (!user || !user.otpHash) {
+      logSecurityEvent("OTP_FAILED", "OTP verification failed", {
+        email,
+        ip: req.ip,
+      });
       return res.status(400).json({ message: "OTP verification failed" });
+    }
 
-    // ⏰ Check expiry
     if (user.otpExpiresAt < new Date())
       return res.status(400).json({ message: "OTP expired" });
 
-    // 🔐 Compare OTP
     const isOtpValid = await bcrypt.compare(otp, user.otpHash);
-    if (!isOtpValid) return res.status(400).json({ message: "Invalid OTP" });
+    if (!isOtpValid) {
+      logSecurityEvent("OTP_FAILED", "Invalid OTP entered", {
+        userId: user._id,
+        ip: req.ip,
+      });
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
 
-    // ✅ OTP verified
     user.isOtpVerified = true;
     user.otpHash = undefined;
     user.otpExpiresAt = undefined;
@@ -134,6 +176,11 @@ const verifyOtpController = async (req, res) => {
     const refreshToken = generateRefreshToken({ id: user._id });
 
     await logActivity(user._id, "OTP verified, login completed");
+
+    logSecurityEvent("LOGIN_SUCCESS", "User logged in with MFA", {
+      userId: user._id,
+      ip: req.ip,
+    });
 
     return res
       .cookie("refreshToken", refreshToken, cookiesOptions)
@@ -160,6 +207,11 @@ const logoutController = async (req, res) => {
   try {
     await logActivity(req.user, "Logout");
 
+    logSecurityEvent("LOGOUT", "User logged out", {
+      userId: req.user,
+      ip: req.ip,
+    });
+
     return res
       .clearCookie("refreshToken")
       .clearCookie("accessToken")
@@ -183,10 +235,7 @@ const changePasswordController = async (req, res) => {
       return res.status(400).json({ message: "New passwords don't match" });
 
     if (!passwordRegex.test(new_password))
-      return res.status(400).json({
-        message:
-          "New password must be at least 6 characters, include an uppercase letter, a lowercase letter, and a number.",
-      });
+      return res.status(400).json({ message: "Weak password" });
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
@@ -195,6 +244,11 @@ const changePasswordController = async (req, res) => {
     await user.save();
 
     await logActivity(user._id, "Password change");
+
+    logSecurityEvent("PASSWORD_CHANGE", "User changed password", {
+      userId: user._id,
+      ip: req.ip,
+    });
 
     return res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
@@ -213,6 +267,11 @@ const deleteUserController = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
 
     await logActivity(req.user, "User deleted");
+
+    logSecurityEvent("ACCOUNT_DELETED", "User account deleted", {
+      userId: req.user,
+      ip: req.ip,
+    });
 
     return res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
