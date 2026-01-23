@@ -1,5 +1,7 @@
 const User = require("../model/user.model.js");
 const bcrypt = require("bcryptjs");
+const axios = require("axios"); // ✅ for reCAPTCHA verification
+const qs = require("qs"); // ✅ for proper form-urlencoded CAPTCHA POST
 const { comparePassword, encryptPassword } = require("../utils/bcrypt.js");
 const { uploadImageToCloudinary } = require("../utils/cloudinary.js");
 const {
@@ -8,7 +10,7 @@ const {
   cookiesOptions,
 } = require("../utils/jwt.js");
 const logActivity = require("../utils/activityLogger.js");
-const logSecurityEvent = require("../utils/securityLogger.js"); // ✅ ADDED
+const logSecurityEvent = require("../utils/securityLogger.js");
 const { generateOTP, hashOTP } = require("../utils/otp.js");
 const sendEmail = require("../utils/sendEmail.js");
 
@@ -76,22 +78,20 @@ const signupController = async (req, res) => {
   }
 };
 
-// -------------------- LOGIN (MFA STEP 1) --------------------
+// -------------------- LOGIN (MFA STEP 1) with CAPTCHA FIX --------------------
 const loginController = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, captchaValue } = req.body;
 
     if ([email, password].some((f) => !f || f.trim() === "")) {
       logSecurityEvent("LOGIN_FAILED", "Empty login fields", { ip: req.ip });
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    // 1. VALIDATE USER CREDENTIALS FIRST
     const user = await User.findOne({ email });
     if (!user) {
-      logSecurityEvent("LOGIN_FAILED", "Invalid email", {
-        email,
-        ip: req.ip,
-      });
+      logSecurityEvent("LOGIN_FAILED", "Invalid email", { email, ip: req.ip });
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -104,12 +104,47 @@ const loginController = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // 🔐 Generate OTP
+    // 2. CAPTCHA VERIFICATION LOGIC
+    // Determine if this is a "Resend OTP" request
+    const isResendRequest = user.otpHash && user.otpExpiresAt > new Date();
+
+    // Only verify ReCAPTCHA if it is a fresh login (not a resend)
+    if (!isResendRequest) {
+      if (!captchaValue) {
+        return res.status(400).json({ message: "Captcha is required" });
+      }
+
+      const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+
+      const captchaResponse = await axios.post(
+        "https://www.google.com/recaptcha/api/siteverify",
+        qs.stringify({
+          secret: secretKey,
+          response: captchaValue,
+        }),
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        },
+      );
+
+      if (!captchaResponse.data.success) {
+        logSecurityEvent("LOGIN_FAILED", "Invalid captcha", {
+          email,
+          ip: req.ip,
+          errorCodes: captchaResponse.data["error-codes"],
+        });
+        return res.status(400).json({ message: "Captcha validation failed" });
+      }
+    }
+
+    // 3. GENERATE OTP (Runs for both initial login and resends)
     const otp = generateOTP();
     const otpHash = await hashOTP(otp);
 
     user.otpHash = otpHash;
-    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins expiry
     user.isOtpVerified = false;
     await user.save();
 
@@ -119,9 +154,12 @@ const loginController = async (req, res) => {
       text: `Your OTP is ${otp}. It will expire in 10 minutes.`,
     });
 
-    await logActivity(user._id, "OTP sent for login");
+    const logMsg = isResendRequest
+      ? "OTP resent for login"
+      : "OTP sent for login";
+    await logActivity(user._id, logMsg);
 
-    logSecurityEvent("OTP_SENT", "OTP sent for MFA login", {
+    logSecurityEvent(isResendRequest ? "OTP_RESENT" : "OTP_SENT", logMsg, {
       userId: user._id,
       ip: req.ip,
     });
@@ -202,7 +240,7 @@ const verifyOtpController = async (req, res) => {
   }
 };
 
-// -------------------- LOGOUT --------------------
+// -------------------- OTHER CONTROLLERS --------------------
 const logoutController = async (req, res) => {
   try {
     await logActivity(req.user, "Logout");
@@ -223,7 +261,6 @@ const logoutController = async (req, res) => {
   }
 };
 
-// -------------------- CHANGE PASSWORD --------------------
 const changePasswordController = async (req, res) => {
   try {
     const { email, new_password, confirm_password } = req.body;
@@ -259,7 +296,6 @@ const changePasswordController = async (req, res) => {
   }
 };
 
-// -------------------- DELETE USER --------------------
 const deleteUserController = async (req, res) => {
   try {
     const deletedUser = await User.findOneAndDelete({ _id: req.user });
@@ -282,7 +318,6 @@ const deleteUserController = async (req, res) => {
   }
 };
 
-// -------------------- UPDATE NAME --------------------
 const updateUserNameController = async (req, res) => {
   try {
     const { name } = req.body;
@@ -309,7 +344,6 @@ const updateUserNameController = async (req, res) => {
   }
 };
 
-// -------------------- UPDATE PROFILE IMAGE --------------------
 const updateProfileImage = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
@@ -337,7 +371,6 @@ const updateProfileImage = async (req, res) => {
   }
 };
 
-// -------------------- EXPORTS --------------------
 module.exports = {
   signupController,
   loginController,

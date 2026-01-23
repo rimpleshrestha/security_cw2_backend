@@ -10,3 +10,29 @@
 {"timestamp":"2026-01-23T10:24:35.209Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
 {"timestamp":"2026-01-23T10:24:39.704Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
 {"timestamp":"2026-01-23T10:24:43.908Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"6973499da33977c9870a591c","ip":"::1"}}
+{"timestamp":"2026-01-23T10:38:21.576Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"69734f9d4ec92eae6e4c030a","email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T10:49:43.948Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T10:49:49.350Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T10:53:38.456Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T10:53:57.629Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T10:54:00.945Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T11:07:43.331Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T11:12:24.756Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T11:18:58.573Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T11:23:07.516Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T11:25:11.455Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"69735a974ec92eae6e4c030f","email":"lol@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T11:33:23.448Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T11:50:27.452Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T11:50:28.064Z","type":"OTP_SENT","message":"OTP sent for MFA login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-23T11:51:05.955Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-23T13:20:51.870Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-23T13:20:59.063Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T13:21:05.522Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T13:27:53.359Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-23T13:28:11.653Z","type":"OTP_FAILED","message":"Invalid OTP entered","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-23T13:28:41.166Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-23T13:30:12.601Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"697377e42ebd01dcc4058fed","email":"rebecca@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T13:30:32.097Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"697377e42ebd01dcc4058fed","ip":"::1"}}
+{"timestamp":"2026-01-23T13:30:36.340Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"697377e42ebd01dcc4058fed","ip":"::1"}}
+{"timestamp":"2026-01-23T13:30:37.575Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"697377e42ebd01dcc4058fed","ip":"::1"}}
+{"timestamp":"2026-01-23T13:30:38.571Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"697377e42ebd01dcc4058fed","ip":"::1"}}
