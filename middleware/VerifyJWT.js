@@ -1,21 +1,36 @@
 const jwt = require("jsonwebtoken");
+const User = require("../model/user.model.js");
 
-function Authenticate(req, res, next) {
+async function Authenticate(req, res, next) {
   try {
     const token = req.headers.authorization?.split(" ")[1];
-    console.log(token);
     if (!token) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No token provided" });
     }
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET, {
-      algorithms: ["HS256"],
-    });
-    console.log(decodedToken);
-    req.user = decodedToken?.id;
+
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET, {
+        algorithms: ["HS256"],
+      });
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).json({ message: "Unauthorized: Token expired" });
+      }
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    }
+
+    // attach only user ID (as assignment expects)
+    req.user = decodedToken.id;
+
     next();
   } catch (error) {
-    console.log("error in authentication", error);
-    res.status(401).json({ message: "Unauthorized" });
+    console.log("Error in authentication:", error);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error during authentication" });
   }
 }
 

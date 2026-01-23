@@ -36,3 +36,7 @@
 {"timestamp":"2026-01-23T13:30:36.340Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"697377e42ebd01dcc4058fed","ip":"::1"}}
 {"timestamp":"2026-01-23T13:30:37.575Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"697377e42ebd01dcc4058fed","ip":"::1"}}
 {"timestamp":"2026-01-23T13:30:38.571Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"697377e42ebd01dcc4058fed","ip":"::1"}}
+{"timestamp":"2026-01-23T13:53:23.207Z","type":"LOGIN_FAILED","message":"Invalid captcha","meta":{"email":"queen@gmail.com","ip":"::1","errorCodes":["invalid-input-response"]}}
+{"timestamp":"2026-01-23T14:12:46.334Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"697381de12f7836f7fcccc58","email":"octo@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-23T14:13:19.761Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"697381de12f7836f7fcccc58","ip":"::1"}}
+{"timestamp":"2026-01-23T14:13:43.000Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"697381de12f7836f7fcccc58","ip":"::1"}}
