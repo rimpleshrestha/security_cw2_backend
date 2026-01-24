@@ -1,13 +1,15 @@
 const Post = require("../model/post.model.js");
 const User = require("../model/user.model.js");
-const logActivity = require("../utils/activityLogger.js"); // updated logger
+const logActivity = require("../utils/activityLogger.js"); // activity logger
+const { sanitizeInput } = require("../utils/sanitize.js");
 
 // =========================
 // CREATE POST (ADMIN)
 // =========================
 async function createPost(req, res) {
   try {
-    const { title, description, image, skin_type } = req.body;
+    // Sanitize all inputs
+    const { title, description, image, skin_type } = sanitizeInput(req.body);
     const userId = req.user; // admin ID from Authenticate middleware
 
     const newPost = new Post({
@@ -41,7 +43,7 @@ async function createPost(req, res) {
 async function updatePost(req, res) {
   try {
     const userId = req.user;
-    const { title, description, image, skin_type } = req.body;
+    const { title, description, image, skin_type } = sanitizeInput(req.body);
 
     const updated = await Post.findOneAndUpdate(
       { _id: req.params.id, user: userId },
