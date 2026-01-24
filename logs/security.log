@@ -40,3 +40,15 @@
 {"timestamp":"2026-01-23T14:12:46.334Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"697381de12f7836f7fcccc58","email":"octo@gmail.com","ip":"::1"}}
 {"timestamp":"2026-01-23T14:13:19.761Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"697381de12f7836f7fcccc58","ip":"::1"}}
 {"timestamp":"2026-01-23T14:13:43.000Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"697381de12f7836f7fcccc58","ip":"::1"}}
+{"timestamp":"2026-01-24T05:29:01.753Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"6974589d210399de6091ceb4","email":"admin@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-24T05:29:31.166Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T05:29:51.949Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T05:32:41.941Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T05:33:18.294Z","type":"OTP_RESENT","message":"OTP resent for login","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T05:33:30.460Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T05:42:08.303Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T05:42:24.216Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T05:50:01.348Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T05:50:31.248Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T06:19:25.940Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T06:19:41.299Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}

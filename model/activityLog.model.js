@@ -19,5 +19,7 @@ const ActivityLogSchema = new mongoose.Schema({
   },
 });
 
-const ActivityLog = mongoose.model("ActivityLog", ActivityLogSchema);
-module.exports = ActivityLog;
+// Safe model export to prevent OverwriteModelError
+module.exports =
+  mongoose.models.ActivityLog ||
+  mongoose.model("ActivityLog", ActivityLogSchema);

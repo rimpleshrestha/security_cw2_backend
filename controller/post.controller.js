@@ -1,10 +1,15 @@
 const Post = require("../model/post.model.js");
 const User = require("../model/user.model.js");
+const logActivity = require("../utils/activityLogger.js"); // updated logger
 
+// =========================
+// CREATE POST (ADMIN)
+// =========================
 async function createPost(req, res) {
   try {
     const { title, description, image, skin_type } = req.body;
-    const userId = req.user;
+    const userId = req.user; // admin ID from Authenticate middleware
+
     const newPost = new Post({
       title,
       description,
@@ -12,7 +17,12 @@ async function createPost(req, res) {
       user: userId,
       skin_type,
     });
+
     const saved = await newPost.save();
+
+    // Log admin action
+    await logActivity(userId, `Created Post: ${saved._id}`, req.ip);
+
     return res.status(201).json({
       message: "Post created successfully",
       post: saved,
@@ -25,10 +35,75 @@ async function createPost(req, res) {
   }
 }
 
+// =========================
+// UPDATE POST (ADMIN)
+// =========================
+async function updatePost(req, res) {
+  try {
+    const userId = req.user;
+    const { title, description, image, skin_type } = req.body;
+
+    const updated = await Post.findOneAndUpdate(
+      { _id: req.params.id, user: userId },
+      { title, description, image, skin_type },
+      { new: true, runValidators: true },
+    );
+
+    if (!updated)
+      return res
+        .status(404)
+        .json({ message: "Post not found or not owned by user" });
+
+    // Log admin action
+    await logActivity(userId, `Updated Post: ${updated._id}`, req.ip);
+
+    return res.json({
+      message: "Post updated successfully",
+      post: updated,
+    });
+  } catch (err) {
+    console.error("Error updating post:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error while updating post" });
+  }
+}
+
+// =========================
+// DELETE POST (ADMIN)
+// =========================
+async function deletePost(req, res) {
+  try {
+    const userId = req.user;
+
+    const deleted = await Post.findOneAndDelete({
+      _id: req.params.id,
+      user: userId,
+    });
+
+    if (!deleted)
+      return res
+        .status(404)
+        .json({ message: "Post not found or not owned by user" });
+
+    // Log admin action
+    await logActivity(userId, `Deleted Post: ${deleted._id}`, req.ip);
+
+    return res.json({ message: "Post deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting post:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error while deleting post" });
+  }
+}
+
+// =========================
+// GET ALL POSTS
+// =========================
 async function getAllPosts(req, res) {
   try {
     const userId = req.user;
-    console.log("User ID from token:", userId);
 
     const user = await User.findById(userId).select("savedPosts");
     const savedSet = new Set(user?.savedPosts.map((id) => id.toString()));
@@ -36,7 +111,7 @@ async function getAllPosts(req, res) {
     const { type } = req.query;
     const query = type ? { skin_type: { $regex: type, $options: "i" } } : {};
 
-    const posts = await Post.find(query).lean(); // lean returns plain objects
+    const posts = await Post.find(query).lean();
     const postsWithFlag = posts.map((post) => ({
       ...post,
       isSaved: savedSet.has(post._id.toString()),
@@ -54,14 +129,14 @@ async function getAllPosts(req, res) {
   }
 }
 
+// =========================
+// GET POST BY ID
+// =========================
 async function getPostById(req, res) {
   try {
-    const post = await Post.findOne({
-      _id: req.params.id,
-    });
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
     return res.json({
       message: "Post fetched successfully",
       post,
@@ -73,13 +148,14 @@ async function getPostById(req, res) {
       .json({ message: "Server error while fetching post" });
   }
 }
+
+// =========================
+// GET SAVED POSTS
+// =========================
 async function getSavedPosts(req, res) {
   try {
     const userId = req.user;
-    console.log("Fetching saved posts for user:");
-    const user = await User.findById(userId)
-      .populate("savedPosts") // This gives full post data
-      .exec();
+    const user = await User.findById(userId).populate("savedPosts").exec();
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -95,29 +171,28 @@ async function getSavedPosts(req, res) {
   }
 }
 
+// =========================
+// SAVE POST (USER ACTION)
+// =========================
 async function savePost(req, res) {
   try {
-    const userId = req.user; // Assuming middleware sets req.user
+    const userId = req.user;
     const postId = req.params.postId;
 
-    // Check if post exists
     const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
+    if (!post) return res.status(404).json({ message: "Post not found" });
 
     const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Avoid saving duplicates
-    if (user.savedPosts.includes(postId)) {
+    if (user.savedPosts.includes(postId))
       return res.status(400).json({ message: "Post already saved" });
-    }
 
     user.savedPosts.push(postId);
     await user.save();
+
+    // Log user action
+    await logActivity(userId, `Saved Post: ${postId}`, req.ip);
 
     return res.json({
       message: "Post saved successfully",
@@ -128,6 +203,10 @@ async function savePost(req, res) {
     return res.status(500).json({ message: "Server error while saving post" });
   }
 }
+
+// =========================
+// UNSAVE POST (USER ACTION)
+// =========================
 async function unsavePost(req, res) {
   try {
     const userId = req.user;
@@ -136,11 +215,13 @@ async function unsavePost(req, res) {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Filter out the postId
     user.savedPosts = user.savedPosts.filter(
-      (savedId) => savedId.toString() !== postId
+      (savedId) => savedId.toString() !== postId,
     );
     await user.save();
+
+    // Log user action
+    await logActivity(userId, `Unsaved Post: ${postId}`, req.ip);
 
     return res.json({
       message: "Post unsaved successfully",
@@ -151,53 +232,6 @@ async function unsavePost(req, res) {
     return res
       .status(500)
       .json({ message: "Server error while unsaving post" });
-  }
-}
-
-async function updatePost(req, res) {
-  try {
-    const userId = req.user;
-    const { title, description, image, skin_type } = req.body;
-    const updated = await Post.findOneAndUpdate(
-      { _id: req.params.id, user: userId },
-      { title, description, image, skin_type },
-      { new: true, runValidators: true }
-    );
-    if (!updated) {
-      return res
-        .status(404)
-        .json({ message: "Post not found or not owned by user" });
-    }
-    return res.json({
-      message: "Post updated successfully",
-      post: updated,
-    });
-  } catch (err) {
-    console.error("Error updating post:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error while updating post" });
-  }
-}
-
-async function deletePost(req, res) {
-  try {
-    const userId = req.user;
-    const deleted = await Post.findOneAndDelete({
-      _id: req.params.id,
-      user: userId,
-    });
-    if (!deleted) {
-      return res
-        .status(404)
-        .json({ message: "Post not found or not owned by user" });
-    }
-    return res.json({ message: "Post deleted successfully" });
-  } catch (err) {
-    console.error("Error deleting post:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error while deleting post" });
   }
 }
 
