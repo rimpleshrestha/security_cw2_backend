@@ -52,3 +52,4 @@
 {"timestamp":"2026-01-24T05:50:31.248Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
 {"timestamp":"2026-01-24T06:19:25.940Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
 {"timestamp":"2026-01-24T06:19:41.299Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"6974589d210399de6091ceb4","ip":"::1"}}
+{"timestamp":"2026-01-24T10:10:18.225Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
