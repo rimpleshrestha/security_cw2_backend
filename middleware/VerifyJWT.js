@@ -1,36 +1,50 @@
 const jwt = require("jsonwebtoken");
-const User = require("../model/user.model.js");
 
 async function Authenticate(req, res, next) {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return res
-        .status(401)
-        .json({ message: "Unauthorized: No token provided" });
+    // 1️⃣ Get token from Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Unauthorized: No token provided",
+      });
     }
 
-    let decodedToken;
+    const token = authHeader.split(" ")[1];
+
+    // 2️⃣ Verify token
     try {
-      decodedToken = jwt.verify(token, process.env.JWT_SECRET, {
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET, {
         algorithms: ["HS256"],
       });
+
+      // Attach user ID to request (used across app)
+      req.user = decodedToken.id;
+
+      next();
     } catch (err) {
+      // 3️⃣ Handle specific JWT errors
       if (err.name === "TokenExpiredError") {
-        return res.status(401).json({ message: "Unauthorized: Token expired" });
+        return res.status(401).json({
+          message: "Unauthorized: Token expired. Please log in again.",
+        });
       }
-      return res.status(401).json({ message: "Unauthorized: Invalid token" });
+
+      if (err.name === "JsonWebTokenError") {
+        return res.status(401).json({
+          message: "Unauthorized: Invalid token",
+        });
+      }
+
+      return res.status(401).json({
+        message: "Unauthorized: Authentication failed",
+      });
     }
-
-    // attach only user ID (as assignment expects)
-    req.user = decodedToken.id;
-
-    next();
   } catch (error) {
-    console.log("Error in authentication:", error);
-    res
-      .status(500)
-      .json({ message: "Internal Server Error during authentication" });
+    console.error("Authentication middleware error:", error);
+    return res.status(500).json({
+      message: "Internal server error during authentication",
+    });
   }
 }
 
