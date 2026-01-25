@@ -346,7 +346,7 @@ const updateUserNameController = async (req, res) => {
 const updateProfileImage = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-
+    console.log(req.file)
     const imageUrl = await uploadImageToCloudinary(req.file.path);
     if (!imageUrl)
       return res.status(500).json({ message: "Failed to upload image" });

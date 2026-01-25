@@ -71,3 +71,23 @@
 {"timestamp":"2026-01-24T17:52:19.330Z","type":"OTP_FAILED","message":"Invalid OTP entered","meta":{"userId":"697505868965ebdf6bd2c36b","ip":"::1"}}
 {"timestamp":"2026-01-24T17:53:11.457Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"697505868965ebdf6bd2c36b","ip":"::1"}}
 {"timestamp":"2026-01-24T18:06:35.624Z","type":"LOGOUT","message":"User logged out","meta":{"userId":"697505868965ebdf6bd2c36b","ip":"::1"}}
+{"timestamp":"2026-01-25T12:39:44.212Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T12:39:48.128Z","type":"OTP_RESENT","message":"OTP resent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T12:40:07.814Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T12:44:05.148Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T12:44:20.757Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T13:00:13.180Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T13:00:33.240Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T13:21:05.360Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T13:21:08.231Z","type":"OTP_RESENT","message":"OTP resent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T13:21:30.512Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T13:55:57.901Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T13:55:58.686Z","type":"OTP_RESENT","message":"OTP resent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T13:55:59.098Z","type":"OTP_RESENT","message":"OTP resent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T13:57:37.405Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-25T14:07:00.623Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"697623846ba5496d7943b5b8","email":"aayush@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-25T14:07:53.252Z","type":"SIGNUP_FAILED","message":"Email already exists","meta":{"email":"aayush@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-25T14:08:05.726Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"697623c56ba5496d7943b5be","email":"rii@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-25T14:09:35.406Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"6976241f6ba5496d7943b5c3","email":"asdasdasda@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-25T14:10:29.683Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"697623846ba5496d7943b5b8","ip":"::1"}}
+{"timestamp":"2026-01-25T14:10:48.569Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"697623846ba5496d7943b5b8","ip":"::1"}}
