@@ -15,7 +15,7 @@ const { generateOTP, hashOTP } = require("../utils/otp.js");
 const sendEmail = require("../utils/sendEmail.js");
 
 // Password regex
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 // -------------------- SIGNUP --------------------
 const signupController = async (req, res) => {
@@ -35,7 +35,7 @@ const signupController = async (req, res) => {
     if (!passwordRegex.test(password))
       return res.status(400).json({
         message:
-          "Password must be at least 6 characters, include uppercase, lowercase and number",
+          "Password must be at least 8 characters, include uppercase, lowercase and number",
       });
 
     const userExists = await User.findOne({ email });
@@ -105,7 +105,6 @@ const loginController = async (req, res) => {
     }
 
     // 2. CAPTCHA VERIFICATION LOGIC
-    // Determine if this is a "Resend OTP" request
     const isResendRequest = user.otpHash && user.otpExpiresAt > new Date();
 
     // Only verify ReCAPTCHA if it is a fresh login (not a resend)
