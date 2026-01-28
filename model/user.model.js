@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -30,7 +31,10 @@ const UserSchema = new mongoose.Schema(
         ref: "Post",
       },
     ],
+    passwordResetToken: { type: String },
+    passwordResetExpires: { type: Date },
 
+    passwordChangedAt: { type: Date },
     // 🔐 MFA / OTP fields
     otpHash: {
       type: String,

@@ -91,3 +91,21 @@
 {"timestamp":"2026-01-25T14:09:35.406Z","type":"SIGNUP_SUCCESS","message":"User registered successfully","meta":{"userId":"6976241f6ba5496d7943b5c3","email":"asdasdasda@gmail.com","ip":"::1"}}
 {"timestamp":"2026-01-25T14:10:29.683Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"697623846ba5496d7943b5b8","ip":"::1"}}
 {"timestamp":"2026-01-25T14:10:48.569Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"697623846ba5496d7943b5b8","ip":"::1"}}
+{"timestamp":"2026-01-28T07:33:26.213Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T07:33:40.135Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T07:34:57.348Z","type":"LOGIN_FAILED","message":"Invalid email","meta":{"email":"Queen@gmail.com","ip":"::1"}}
+{"timestamp":"2026-01-28T08:02:14.533Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T08:02:43.463Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T08:03:52.043Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T09:36:49.524Z","type":"PASSWORD_RESET_REQUEST","message":"Password reset email sent","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T09:58:08.005Z","type":"PASSWORD_RESET_REQUEST","message":"Password reset email sent","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T09:58:48.055Z","type":"PASSWORD_RESET","message":"Password reset successful","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T09:59:32.710Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T10:00:30.403Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T10:00:31.797Z","type":"OTP_RESENT","message":"OTP resent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T10:00:58.038Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T10:21:14.372Z","type":"PASSWORD_RESET_REQUEST","message":"Password reset email sent","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T10:21:57.680Z","type":"PASSWORD_RESET","message":"Password reset successful","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T10:22:49.276Z","type":"LOGIN_FAILED","message":"Incorrect password","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T10:23:27.355Z","type":"OTP_SENT","message":"OTP sent for login","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}
+{"timestamp":"2026-01-28T10:23:42.645Z","type":"LOGIN_SUCCESS","message":"User logged in with MFA","meta":{"userId":"69734f9d4ec92eae6e4c030a","ip":"::1"}}

@@ -11,6 +11,8 @@ const {
   deleteUserController,
   updateProfileImage,
   verifyOtpController,
+  requestPasswordResetController, // ✅ new
+  resetPasswordController, // ✅ new
 } = require("../controller/user.controller.js");
 
 const {
@@ -36,6 +38,18 @@ router.post("/signup", validate(signupSchema), signupController);
 router.post("/login", loginLimiter, validate(loginSchema), loginController);
 router.post("/verify-otp", validate(otpSchema), verifyOtpController);
 router.post("/logout", Authenticate, logoutController);
+
+// ================= PASSWORD RESET =================
+router.post(
+  "/request-password-reset",
+
+  requestPasswordResetController,
+);
+router.post(
+  "/reset-password",
+
+  resetPasswordController,
+);
 
 // ================= USER ROUTES =================
 router.put(
